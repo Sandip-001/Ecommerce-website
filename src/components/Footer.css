@@ -1,0 +1,15 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer{
+    height: 70px;
+    background-color: skyblue;
+    width: 100%;
+    text-align: center;
+}
+.footer h3{
+    padding: 22px;
+}

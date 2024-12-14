@@ -1,0 +1,81 @@
+/* Container styling */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff9a9e, #e0d5d5);
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Card styling */
+  .profile-card {
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    padding: 20px;
+    max-width: 350px;
+    width: 100%;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  
+  /* Image styling */
+  .profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 4px solid #ff9a9e;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* Name styling */
+  .profile-name {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  /* Email styling */
+  .profile-email {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 15px;
+  }
+  
+  /* Card hover effect */
+  .profile-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-card:hover .profile-photo {
+    transform: scale(1.1);
+  }
+  
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    .profile-card {
+      padding: 15px;
+    }
+  
+    .profile-name {
+      font-size: 1.3rem;
+    }
+  
+    .profile-email {
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .profile-photo {
+      width: 37%;
+      height: 37%;
+    }
+  }
+  
