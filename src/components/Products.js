@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./Products.css";
 import { Link } from "react-router-dom";
+import Cart from "./Cart";
 
-const Products = () => {
+const Products = ({ cart, setCart }) => {
   const [products, setProducts] = useState([]);
   const auth = localStorage.getItem("user");
   const userId = JSON.parse(auth).user._id;
@@ -63,7 +64,22 @@ const Products = () => {
       setProducts([]); // Fallback to empty array
     }
     }
-  
+
+    // Add product to the cart
+  const addToCart = (product) => {
+    const isProductInCart = cart.some((item) => item._id === product._id);
+
+    if (!isProductInCart) {
+      setCart((prevCart) => [...prevCart, { ...product, quantity: 1 }]);
+      alert("product added successfully")
+    }
+  };
+
+  // Check if a product is already in the cart
+  const isProductInCart = (productId) => {
+    return cart.some((item) => item._id === productId);
+  };
+
 
   return (
     <>
@@ -93,6 +109,17 @@ const Products = () => {
                 <p className="delete-edit" onClick={()=>deleteProduct(product._id)} ><i class="fa-solid fa-trash-can"></i></p>
                 <p className="delete-edit"><Link to={`/updateproduct/${product._id}`}><i class="fa-regular fa-pen-to-square"></i></Link></p>
               </div>
+              <button
+                  onClick={() => addToCart(product)}
+                  className={`add-to-cart-btn ${
+                    isProductInCart(product._id) ? "disabled" : ""
+                  }`}
+                  disabled={isProductInCart(product._id)}
+                >
+                  {isProductInCart(product._id)
+                    ? "Product Added in Cart"
+                    : "Add to Cart"}
+                </button>
             </div>
           </div>
         ))
