@@ -4,6 +4,7 @@ const express = require('express');
 const multer = require('multer')
 const User = require('./models/user');
 const Product = require('./models/product');
+const Cart = require('./models/cart')
 const cors = require('cors');
 const app = express();
 const Jwt = require('jsonwebtoken');
@@ -218,9 +219,138 @@ if(result.length > 0) {
   resp.status(404).send({ message: 'No product found'});
 }
 
-
 })
 
+
+// Add to cart api
+app.post("/add-to-cart", verifyToken, async (req, res) => {
+  try {
+    const { userId, productId, quantity } = req.body;
+
+    // Validate request
+    if (!userId || !productId || !quantity) {
+      return res.status(400).send({ message: "Missing required fields" });
+    }
+
+    // Check if the cart exists for the user
+    let cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+      // If no cart exists, create a new one
+      cart = new Cart({ userId, products: [] });
+    }
+
+    // Check if the product is already in the cart
+    const productIndex = cart.products.findIndex(
+      (product) => product.productId === productId
+    );
+
+    if (productIndex > -1) {
+      // If product exists, update its quantity
+      cart.products[productIndex].quantity += quantity;
+    } else {
+      // If product does not exist, add it to the cart
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        return res.status(404).send({ message: "Product not found" });
+      }
+
+      cart.products.push({
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        quantity,
+      });
+    }
+
+    // Save the cart
+    await cart.save();
+
+    res.status(200).send({ message: "Product added to cart", cart });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).send({ message: "Server error", error });
+  }
+});
+
+
+// Get User Cart API
+app.get("/cart/:userId", verifyToken, async (req, resp) => {
+
+  try {
+    // Find the cart for the given userId
+    const cart = await Cart.findOne({ userId: req.params.userId });
+
+    if (!cart) {
+      return resp.status(404).send({ message: "Cart is empty for this user" });
+    }
+
+    // Transform the cart data to include product details
+    const cartData = cart.products.map((product) => ({
+      productId: product.productId,
+      name: product.name,
+      price: product.price,
+      quantity: product.quantity,
+    }));
+
+    resp.send({
+      message: "Cart fetched successfully",
+      cart: {
+        userId: cart.userId,
+        products: cartData,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    resp.status(500).send({ message: "Server error", error });
+  }
+});
+
+// Update product quantity in cart
+app.put("/cart/update-quantity", verifyToken, async (req, resp) => {
+  const { userId, productId, change } = req.body;
+
+  try {
+    // Find the user's cart
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+      return resp.status(404).send({ message: "Cart not found" });
+    }
+
+    // Find the product in the cart
+    const productIndex = cart.products.findIndex(
+      (product) => product.productId.toString() === productId
+    );
+
+    if (productIndex === -1) {
+      return resp.status(404).send({ message: "Product not found in cart" });
+    }
+
+    // Update the product quantity
+    cart.products[productIndex].quantity += change;
+
+    // If quantity becomes 0 or less, remove the product from the cart
+    if (cart.products[productIndex].quantity <= 0) {
+      cart.products.splice(productIndex, 1);
+    }
+
+    // Save the updated cart
+    await cart.save();
+
+    resp.send({
+      message: "Cart updated successfully",
+      cart: {
+        userId: cart.userId,
+        products: cart.products,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating cart:", error);
+    resp.status(500).send({ message: "Server error", error });
+  }
+});
 
   
 app.listen(5100);
