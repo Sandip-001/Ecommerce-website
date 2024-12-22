@@ -1,74 +1,122 @@
-import React, { useEffect } from "react";
-import "./Cart.css"; // Import the CSS file
+import React, { useEffect, useState } from "react";
+import "./Cart.css";
 
-const Cart = ({ cart, setCart }) => {
+const Cart = () => {
+  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
+  const auth = localStorage.getItem("user");
+  const userId = JSON.parse(auth).user._id;
+
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    fetchCartProducts();
+    fetchProducts();
+    // eslint-disable-next-line
+  }, []);
 
-  const increaseQuantity = (product) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item._id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
+  // Fetch cart details
+  const fetchCartProducts = async () => {
+    try {
+      const response = await fetch(`http://localhost:5100/cart/${userId}`, {
+        headers: {
+          contentType : "application-json",
+          authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data) {
+        setCart(data.cart.products);
+      }
+    } catch (error) {
+      console.error("Error fetching cart products:", error);
+    }
   };
 
-  const decreaseQuantity = (product) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0) //Remove the product
-    );
+  // Fetch all products to get their images
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`http://localhost:5100/products/${userId}`, {
+        headers: {
+          contentType : "application-json",
+          authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
+        },
+      });
+      const data = await response.json();
+      if (data.products) {
+        setProducts(data.products);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
   };
 
-  const totalPrice = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  // Map product images using the product ID
+  const getProductImage = (productId) => {
+    const product = products.find((p) => p._id === productId);
+    if (product) {
+      return `data:${product.image.contentType};base64,${product.image.data}`;
+    }
+    return null;
+  };
+
+   // Update product quantity in the cart
+   const updateProductQuantity = async (productId, change) => {
+    try {
+      const response = await fetch("http://localhost:5100/cart/update-quantity", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
+        },
+        body: JSON.stringify({
+          userId,
+          productId,
+          change, // 1 for increase, -1 for decrease
+        }),
+      });
+
+      const data = await response.json();
+      if (data && data.cart) {
+        setCart(data.cart.products); 
+      }
+    } catch (error) {
+      console.error("Error updating product quantity:", error);
+    }
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  };
 
   return (
     <div className="cart-container">
       <h2 className="cart-title">Your Cart</h2>
-      {cart.length > 0 ? (
+      {cart && cart.length > 0 ? (
         <div>
           {cart.map((item) => (
             <div className="cart-item" key={item._id}>
               <div className="cart-image-container">
-                <img
-                  src={`data:${item.image.contentType};base64,${item.image.data}`}
-                  alt={item.name}
-                  className="cart-product-image"
-                />
+                  <img
+                    src={getProductImage(item.productId)}
+                    alt={item.name}
+                    className="cart-product-image"
+                  />
               </div>
               <div className="cart-details">
                 <h4 className="cart-product-name">{item.name}</h4>
-                <p className="cart-product-price">₹{item.price * item.quantity}</p>
+                <p className="cart-product-price">
+                  ₹{item.price * item.quantity}
+                </p>
                 <div className="cart-quantity-controls">
-                  <button
-                    className="quantity-button decrease"
-                    onClick={() => decreaseQuantity(item)}
-                  >
-                    -
-                  </button>
+                  <button className="quantity-button decrease" onClick={()=>updateProductQuantity(item.productId, -1)} >-</button>
                   <span className="quantity">{item.quantity}</span>
-                  <button
-                    className="quantity-button increase"
-                    onClick={() => increaseQuantity(item)}
-                  >
-                    +
-                  </button>
+                  <button className="quantity-button increase" onClick={()=>updateProductQuantity(item.productId, 1)}>+</button>
                 </div>
               </div>
             </div>
           ))}
           <div className="cart-total">
-            <h3>Total: ₹{totalPrice}</h3>
+            <h3>Total: ₹{calculateTotal()}</h3>
           </div>
         </div>
       ) : (
@@ -79,5 +127,3 @@ const Cart = ({ cart, setCart }) => {
 };
 
 export default Cart;
-
-

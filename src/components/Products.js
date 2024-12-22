@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./Products.css";
 import { Link } from "react-router-dom";
-import Cart from "./Cart";
 
-const Products = ({ cart, setCart }) => {
+
+const Products = () => {
   const [products, setProducts] = useState([]);
   const auth = localStorage.getItem("user");
   const userId = JSON.parse(auth).user._id;
-  console.log(userId);
+  
 
   useEffect(() => {
     fetchProducts();
@@ -17,6 +17,7 @@ const Products = ({ cart, setCart }) => {
     try {
       const response = await fetch(`http://localhost:5100/products/${userId}`,{
         headers:{
+          contentType : "application-json",
           authorization :`bearer ${JSON.parse(localStorage.getItem('token'))}`
         }
       }
@@ -66,19 +67,32 @@ const Products = ({ cart, setCart }) => {
     }
 
     // Add product to the cart
-  const addToCart = (product) => {
-    const isProductInCart = cart.some((item) => item._id === product._id);
-
-    if (!isProductInCart) {
-      setCart((prevCart) => [...prevCart, { ...product, quantity: 1 }]);
-      alert("product added successfully")
-    }
-  };
-
-  // Check if a product is already in the cart
-  const isProductInCart = (productId) => {
-    return cart.some((item) => item._id === productId);
-  };
+    const addToCart = async (product) => {
+      try {
+        const response = await fetch(`http://localhost:5100/add-to-cart`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
+          },
+          body: JSON.stringify({
+            userId,
+            productId: product._id,
+            quantity: 1, 
+            image:product.image
+          }),
+        });
+        const data = await response.json();
+        console.log(data);
+        if(data) {
+          alert(data.message);
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error("Error adding product to cart:", error);
+      }
+    };
 
 
   return (
@@ -109,16 +123,8 @@ const Products = ({ cart, setCart }) => {
                 <p className="delete-edit" onClick={()=>deleteProduct(product._id)} ><i class="fa-solid fa-trash-can"></i></p>
                 <p className="delete-edit"><Link to={`/updateproduct/${product._id}`}><i class="fa-regular fa-pen-to-square"></i></Link></p>
               </div>
-              <button
-                  onClick={() => addToCart(product)}
-                  className={`add-to-cart-btn ${
-                    isProductInCart(product._id) ? "disabled" : ""
-                  }`}
-                  disabled={isProductInCart(product._id)}
-                >
-                  {isProductInCart(product._id)
-                    ? "Product Added in Cart"
-                    : "Add to Cart"}
+              <button className="add-to-cart-btn" onClick={()=>addToCart(product)}>
+                 Add to Cart
                 </button>
             </div>
           </div>
@@ -132,4 +138,3 @@ const Products = ({ cart, setCart }) => {
 };
 
 export default Products;
-

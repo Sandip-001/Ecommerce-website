@@ -13,10 +13,6 @@ import Cart from './components/Cart';
 import { useState } from 'react';
 
 function App() {
-  const [cart, setCart] = useState(() => {
-    const storedCart = localStorage.getItem("cart");
-    return storedCart ? JSON.parse(storedCart) : [];
-  });
 
 
   return (
@@ -25,11 +21,11 @@ function App() {
       <Navbar/>
       <Routes>
         <Route element ={<PrivateComponent/>}>
-         <Route exact path = "/" element={<Products cart={cart} setCart={setCart}/>}/>
+         <Route exact path = "/" element={<Products/>}/>
          <Route exact path = "/addproduct" element={<AddProduct/>}/>
          <Route exact path = '/updateproduct/:id' element={<UpdateProduct/>}/>
          <Route exact path = "/profile" element={<Profile/>}/>
-         <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
+         <Route path="/cart" element={<Cart/>} />
         </Route>
         <Route exact path = "/login" element={<Login/>}/>
         <Route exact path = "/signup" element={<Signup/>}/>
