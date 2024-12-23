@@ -11,6 +11,7 @@ const Products = ({setCartQuantity}) => {
 
   useEffect(() => {
     fetchProducts();
+    //eslint-disable-next-line
   }, []);
 
   const fetchProducts = async () => {
