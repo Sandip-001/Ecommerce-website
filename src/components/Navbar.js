@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({cartQuantity}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const auth = localStorage.getItem("user");
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const Navbar = () => {
               <Link to="/addproduct">Add Products</Link>
             </li>
             <li>
-              <Link to="/cart">Cart</Link>
+              <Link to="/cart">Cart({cartQuantity})</Link>
             </li>
             <li>
               <Link to="/profile">Profile</Link>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Cart.css";
 
-const Cart = () => {
+const Cart = ({setCartQuantity}) => {
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
   const auth = localStorage.getItem("user");
@@ -26,6 +26,7 @@ const Cart = () => {
       console.log(data);
       if (data) {
         setCart(data.cart.products);
+        updateCartQuantity(data.cart.products)
       }
     } catch (error) {
       console.error("Error fetching cart products:", error);
@@ -44,6 +45,8 @@ const Cart = () => {
       const data = await response.json();
       if (data.products) {
         setProducts(data.products);
+
+       
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -78,10 +81,20 @@ const Cart = () => {
       const data = await response.json();
       if (data && data.cart) {
         setCart(data.cart.products); 
+        updateCartQuantity(data.cart.products)
       }
     } catch (error) {
       console.error("Error updating product quantity:", error);
     }
+  };
+
+   // Calculate the total cart quantity
+   const updateCartQuantity = (cartProducts) => {
+    const totalQuantity = cartProducts.reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
+    setCartQuantity(totalQuantity);
   };
 
   const calculateTotal = () => {

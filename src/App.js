@@ -14,18 +14,20 @@ import { useState } from 'react';
 
 function App() {
 
+  const[cartQuantity,setCartQuantity] = useState(0);
+
 
   return (
     <>
     <Router>
-      <Navbar/>
+      <Navbar cartQuantity={cartQuantity}/>
       <Routes>
         <Route element ={<PrivateComponent/>}>
-         <Route exact path = "/" element={<Products/>}/>
+         <Route exact path = "/" element={<Products setCartQuantity={setCartQuantity}/>}/>
          <Route exact path = "/addproduct" element={<AddProduct/>}/>
          <Route exact path = '/updateproduct/:id' element={<UpdateProduct/>}/>
          <Route exact path = "/profile" element={<Profile/>}/>
-         <Route path="/cart" element={<Cart/>} />
+         <Route path="/cart" element={<Cart setCartQuantity={setCartQuantity}/>} />
         </Route>
         <Route exact path = "/login" element={<Login/>}/>
         <Route exact path = "/signup" element={<Signup/>}/>

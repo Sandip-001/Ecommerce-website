@@ -93,8 +93,7 @@ body {
       opacity: 1;
     }
   }
-  
-  /* Mobile-specific styling */
+
   @media (max-width: 768px) {
     ul.list {
       flex-direction: column;

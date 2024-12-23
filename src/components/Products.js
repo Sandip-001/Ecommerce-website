@@ -3,7 +3,7 @@ import "./Products.css";
 import { Link } from "react-router-dom";
 
 
-const Products = () => {
+const Products = ({setCartQuantity}) => {
   const [products, setProducts] = useState([]);
   const auth = localStorage.getItem("user");
   const userId = JSON.parse(auth).user._id;
@@ -83,9 +83,9 @@ const Products = () => {
           }),
         });
         const data = await response.json();
-        console.log(data);
         if(data) {
           alert(data.message);
+          updateCartQuantity(data.cart.products)
         } else {
           alert(data.message);
         }
@@ -93,6 +93,15 @@ const Products = () => {
         console.error("Error adding product to cart:", error);
       }
     };
+
+    // Calculate the total cart quantity
+   const updateCartQuantity = (cartProducts) => {
+    const totalQuantity = cartProducts.reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
+    setCartQuantity(totalQuantity);
+  };
 
 
   return (
